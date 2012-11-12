@@ -1,0 +1,90 @@
+############################
+#    Project CloudMine     #
+############################
+
+By { "Debarshi Basak" : "D.Basak@student.tudelft.nl", "Korijn van Golen" : "K.vanGolen@student.tudelft.nl" }
+
+Project CloudMine is a open source cloud based text mining application built for Open Nebula and has been implemented as a part curriculum of "Cloud Computing" at DAS4 systems at TU delft. The idea is to provide automated, elastic,reliable and monitored application for Open Nebula.
+
+
+---------------------------
+|   Installation Guide    |
+---------------------------
+
+
+Project CloudMine depends heavily on two environment variable
+In order to start Project CloudMine you need to export as follows: 
+
+export PROJECT_CLOUD=/home/$USER/ProjectCloud    ---> Location of the Project
+export PATH=$PATH:$PROJECT_CLOUD/bin
+
+Once these environment variables are set, there important configuration files in $PROJECT_CLOUD/conf
+
+
+cloud_env and image_conf
+
+
+cloud_env is the configuration file that contains 
+
+user:cloudpass 
+<XML_RPC service address of OpenNebula>
+POOL_SIZE=<POOL SIZE>
+
+whereas image_conf is the VM image .one file which contains the VM image details. You simply have to paste the .one contents inside image_conf. Sample configurations are given in the file.
+
+
+
+CloudMine also consists of a ACL that can be manipulated in $PROJECT_CLOUD/conf/.acl/acl
+By default we have user1 as the username and password as the default password
+
+Check list
+-----------
+-Open Nebula Cloud is working
+-Environment variable are set
+-Cloudpass and rest of the configurations are set in cloud_env and image_conf
+
+
+Try the command
+
+auto user1 password
+
+This command starts a service that is responsible for Scaling up and scaling down automatically (i.e. when the Pool size is changed) and starting monitoring services at new VMs
+
+
+to submit a task try
+
+submit user1 password <path-to-the-file> <phrase>
+ 
+
+You can also try the benchmark script i.e.
+
+benchmark
+
+
+If you observe carefully, Load balancing works in a round robin fashion.
+
+
+The thing is CloudMine is well componentized therefore each features have been developed to generic in nature. We can tasks to be performed as Pay Load. You can change the behavior of the task by changing Pay Load.
+
+
+Other features
+-distributed_proc
+
+Consider the input file to be really huge,you can use this feature thats splits the input and sends it to different VMs and collects the results from each of them.
+
+eg.
+
+distributed_proc user1 password <path-to-input-file> <phrase-or-word> <Split-size-in-bytes>
+
+-You can collect VM stats, task logs and result explicitly too.
+
+
+
+"It's working on my side. I can't assure your's"
+
+
+Thus you can always notify the issues at github or write to us.
+
+
+
+

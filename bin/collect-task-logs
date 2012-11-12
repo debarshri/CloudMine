@@ -1,0 +1,33 @@
+# Copyright 2012, Debarshi Basak D.Basak@student.tudelft.nl
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+cp $PROJECT_CLOUD/conf/.fifo $PROJECT_CLOUD/conf/.collecttask
+COUNT=`cat $PROJECT_CLOUD/conf/.collecttask|wc -l`
+COLLDATE=`date "+%Y%m%d%H%M%S"`
+while [ $COUNT -gt 0 ]
+do
+VM_ID=$(head -n 1 $PROJECT_CLOUD/conf/.collecttask)
+sed -i 1d $PROJECT_CLOUD/conf/.collecttask
+echo $VM_ID >> $PROJECT_CLOUD/conf/.collecttask
+echo "collecting stats $VM_ID"
+mkdir $PROJECT_CLOUD/logs/VM_ID$VM_ID$COLLDATE
+COUNT=`expr $COUNT - 1`
+VM_IP=`onevm show $VM_ID | grep IP= | sed 's/.*IP="*\([^"]*\)"*,/\1/'`
+echo "`scp opennebula@$VM_IP:/home/opennebula/task.log $PROJECT_CLOUD/logs/`" >> $PROJECT_CLOUD/logs/sys.log
+touch $PROJECT_CLOUD/logs/$VM_ID_$1
+cat $PROJECT_CLOUD/logs/task.log >> $PROJECT_CLOUD/logs/$VM_ID_$1
+rm -rf $PROJECT_CLOUD/logs/task.log
+done
+rm -f $PROJECT_CLOUD/conf/.collectVMstats

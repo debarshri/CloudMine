@@ -1,0 +1,57 @@
+# Copyright 2012, Debarshi Basak D.Basak@student.tudelft.nl
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+
+
+COUNT=`cat $PROJECT_CLOUD/conf/.nodes|wc -l`
+while [ $COUNT -gt 0 ]
+do
+line=$(head -n 1 $PROJECT_CLOUD/conf/.nodes)
+RUN11_ID=`onevm list|grep $line`
+touch $PROJECT_CLOUD/logs/vmstat.log
+echo $RUN11_ID >> $PROJECT_CLOUD/logs/vmstat.log
+VM_ID=$(echo $RUN11_ID | cut -d' ' -f1)
+USR_NAME=$(echo $RUN11_ID | cut -d' ' -f2)
+GRP_NAME=$(echo $RUN11_ID | cut -d' ' -f3)
+IMG_NAME=$(echo $RUN11_ID | cut -d' ' -f4)
+STAT_NAME=$(echo $RUN11_ID | cut -d' ' -f5)
+CPU_NUM=$(echo $RUN11_ID | cut -d' ' -f6)
+MEM_NUM=$(echo $RUN11_ID | cut -d' ' -f7)
+TIME_DAY=$(echo $RUN11_ID | cut -d' ' -f8)
+TIME_HR=$(echo $RUN11_ID | cut -d' ' -f9)
+TIME_MIN=$(echo $RUN11_ID | cut -d' ' -f10)
+if [ $STAT_NAME = "runn" ] 
+then
+if [ $CPU_NUM -gt 0 ]
+then
+echo $VM_ID >> $PROJECT_CLOUD/conf/.fifo
+echo $VM_ID >> $PROJECT_CLOUD/conf/.monitor
+echo "Registered $COUNT"
+touch $PROJECT_CLOUD/logs/$1.log
+touch $PROJECT_CLOUD/logs/sys.log
+VM_IP=`ruby $PROJECT_CLOUD/lib/headnode.rb $VM_ID`
+echo "`scp $PROJECT_CLOUD/bin/monitor-remote.sh opennebula@$VM_IP:/home/opennebula/`" >> $PROJECT_CLOUD/logs/sys.log
+ssh opennebula@$VM_IP 'bash -i' /home/opennebula/monitor-remote.sh &
+echo "Monitoring started for $VM_ID"
+sed -i 1d $PROJECT_CLOUD/conf/.nodes
+else
+echo "VM allocated, No CPU allocated yet, Keep some faith and have some patience :p"
+fi
+else
+echo "VM is still pending"
+fi
+
+COUNT=`expr $COUNT - 1`
+done

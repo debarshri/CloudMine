@@ -1,0 +1,3 @@
+CLOUD_PASS=in439210:QWwmie08
+ENDPOINT=http://localhost:2633/RPC2
+POOL_SIZE=4

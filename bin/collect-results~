@@ -1,0 +1,47 @@
+# Copyright 2012, Debarshi Basak(D.Basak@student.tudelft.nl)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+USRPSWD=`cat $PROJECT_CLOUD/conf/.acl/acl|grep $1`
+USRNAME=$(echo $USRPSWD | cut -d',' -f1)
+PSWD=$(echo $USRPSWD | cut -d',' -f2)
+if [ ! -z $USRPSWD ]
+then
+if [ $PSWD = $2 ]
+then 
+cp $PROJECT_CLOUD/conf/.fifo $PROJECT_CLOUD/conf/.collectResults
+COUNT=`cat $PROJECT_CLOUD/conf/.collectResults | wc -l`
+while [ $COUNT -gt 0 ]
+do
+VM_ID=$(head -n 1 $PROJECT_CLOUD/conf/.collectResults)
+sed -i 1d $PROJECT_CLOUD/conf/.collectResults
+echo $VM_ID >> $PROJECT_CLOUD/conf/.collectResults
+touch $PROJECT_CLOUD/logs/$1.log
+touch $PROJECT_CLOUD/logs/sys.log
+echo "Collecting results from $VM_ID"
+VM_IP=`onevm show $VM_ID | grep IP= | sed 's/.*IP="*\([^"]*\)"*,/\1/'`
+echo "COLLECTING_RESULTS,VM_ID=$VM_ID,IP=$VM_IP,TIME=`date "+%Y-%m-%d %H:%M:%S"`,$PWD/$3" >> $PROJECT_CLOUD/logs/$1.log
+echo "`scp -r opennebula@$VM_IP:/home/opennebula/$1/ /tmp/`" >> $PROJECT_CLOUD/logs/sys.log
+touch $PROJECT_CLOUD/data/$1
+echo "`cat /tmp/$1/* >> $PROJECT_CLOUD/data/$1`" >> $PROJECT_CLOUD/logs/sys.log
+rm -rf /tmp/$1/
+COUNT=`expr $COUNT - 1`
+done
+rm -f $PROJECT_CLOUD/conf/.collectResults
+else
+echo "Permission denied"
+fi
+else
+echo "Permission denied"
+fi

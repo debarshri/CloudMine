@@ -1,0 +1,49 @@
+# Copyright 2012, Debarshi Basak(D.Basak@student.tudelft.nl)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+ruby $PROJECT_CLOUD/lib/shutAll.rb $1 $2
+echo "Clearing"
+COUNT=`cat $PROJECT_CLOUD/conf/.removed|wc -l`
+while [ $COUNT -gt 0 ]
+do
+echo "Cleared and removed"
+line=$(head -n 1 $PROJECT_CLOUD/conf/.removed)
+sed -i 1d $PROJECT_CLOUD/conf/.removed
+COUNT=`expr $COUNT - 1`
+done
+COUNT=`cat $PROJECT_CLOUD/conf/.nodes|wc -l`
+while [ $COUNT -gt 0 ]
+do
+echo "Cleared nodes"
+line=$(head -n 1 $PROJECT_CLOUD/conf/.nodes)
+sed -i 1d $PROJECT_CLOUD/conf/.nodes
+COUNT=`expr $COUNT - 1`
+done
+COUNT=`cat $PROJECT_CLOUD/conf/.fifo|wc -l`
+echo "Clear FIFO"
+while [ $COUNT -gt 0 ]
+do
+line=$(head -n 1 $PROJECT_CLOUD/conf/.fifo)
+sed -i 1d $PROJECT_CLOUD/conf/.fifo
+COUNT=`expr $COUNT - 1`
+done
+echo "Cleared Monitor"
+COUNT=`cat $PROJECT_CLOUD/conf/.monitor|wc -l`
+while [ $COUNT -gt 0 ]
+do
+line=$(head -n 1 $PROJECT_CLOUD/conf/.monitor)
+sed -i 1d $PROJECT_CLOUD/conf/.monitor
+COUNT=`expr $COUNT - 1`
+done

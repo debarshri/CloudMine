@@ -1,0 +1,49 @@
+# Copyright 2012, Debarshi Basak(D.Basak@student.tudelft.nl)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+USRPSWD=`cat $PROJECT_CLOUD/conf/.acl/acl|grep $1`
+USRNAME=$(echo $USRPSWD | cut -d',' -f1)
+PSWD=$(echo $USRPSWD | cut -d',' -f2)
+if [ ! -z $USRPSWD ]
+then
+if [ $PSWD = $2 ]
+then 
+COUNT=`cat $PROJECT_CLOUD/conf/.fifo | wc -l`
+if [ $COUNT -gt 0 ]
+then
+VM_ID=$(head -n 1 $PROJECT_CLOUD/conf/.fifo)
+sed -i 1d $PROJECT_CLOUD/conf/.fifo
+echo $VM_ID >> $PROJECT_CLOUD/conf/.fifo
+touch $PROJECT_CLOUD/logs/$1.log
+touch $PROJECT_CLOUD/logs/sys.log
+touch $PROJECT_CLOUD/logs/vm_request.log
+VM_IP=`ruby $PROJECT_CLOUD/lib/headnode.rb $VM_ID`
+#ssh opennebula@$VM_IP 'bash -i' /home/opennebula/monitor-remote.sh &
+echo "SUBMITTING_TASK,VM_ID=$VM_ID,IP=$VM_IP,TIME=`date "+%Y-%m-%d %H:%M:%S"`,$PWD/$3" >> $PROJECT_CLOUD/logs/$1.log
+echo "`scp $3 opennebula@$VM_IP:/home/opennebula/`" >> $PROJECT_CLOUD/logs/sys.log
+echo "`ssh opennebula@$VM_IP 'bash -s' < $PROJECT_CLOUD/bin/job.sh $1 $3 $4`" >> $PROJECT_CLOUD/logs/sys.log
+DATE_SUB=`date "+%Y-%m-%d %H:%M:%S"`
+echo "$DATE_SUB,$VM_ID,1" >> $PROJECT_CLOUD/logs/vm_request.log
+echo "Submitted job to $VM_ID"
+#monitor-remote-stop.sh
+else
+echo "No VMs ready yet"
+fi
+else
+echo "Permission denied"
+fi
+else
+echo "Permission denied"
+fi

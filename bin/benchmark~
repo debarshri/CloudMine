@@ -1,0 +1,48 @@
+# Copyright 2012, Debarshi Basak(D.Basak@student.tudelft.nl)
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+
+touch benchmark.log
+COUNT=300
+TOTAL_DIFF=0
+START_TIME=`date "+%Y-%M-%D %H:%M:%S"`
+while [ $COUNT -gt 0 ]
+do
+COLLDATE=`date "+%H%M%S%N"`
+submit user1 password $PROJECT_CLOUD/example/file PROCS
+ENDDATE=`date "+%H%M%S%N"`
+DIFF=`expr $ENDDATE - $COLLDATE`
+echo "Time taken:$DIFF nanoseconds" 
+echo "TASK$COUNT,TIME_TAKEN=$DIFF" >> benchmark.log
+COUNT=`expr $COUNT - 1`
+done
+TOTAL_DIFF=`date "+%Y-%M-%D %H:%M:%S"`
+COUNT=5
+TOTAL_COLL=0
+COLLDATE=`date "+%H%M%S"`
+collect-results user1 password
+collect-vm-stats user1 password
+ENDDATE=`date "+%H%M%S"`
+DIFF=`expr $ENDDATE - $COLLDATE`
+TOTAL_COLL=`expr $TOTAL_COLL + $DIFF`
+echo "Time taken:$DIFF seconds"
+COUNT=`expr $COUNT - 1`
+echo "Benchmark started at $START_TIME"
+echo ""
+echo "Sending and processing responses ended at : $TOTAL_DIFF "
+echo ""
+echo "Total time taken for collecting results: $TOTAL_COLL seconds"
+echo ""
+echo "You can do the math :p "

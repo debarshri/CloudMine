@@ -1,0 +1,16 @@
+START_TIME=`date "+%Y-%M-%D %H:%M:%S"`
+echo $START_TIME
+split -b $5 $3
+COUNT=`ls|grep "x"|wc -l`
+FILE_NAMES=`ls|grep "x"`
+while [ $COUNT -gt 0 ]
+do
+I_FILE_NAME=`echo $FILE_NAMES|cut -d' ' -f$COUNT`
+chmod 777 $PWD/$I_FILE_NAME
+submit $1 $2 $PWD/$I_FILE_NAME $4
+COUNT=`expr $COUNT - 1`
+rm $PWD/$I_FILE_NAME
+done 
+collect-results $1 $2
+END_TIME=`date "+%Y-%M-%D %H:%M:%S"`
+echo $END_TIME
